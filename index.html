@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Tracking Dashboard</title>
+    <style>
+        body { 
+            font-family: 'Comic Sans MS', cursive, sans-serif; 
+            background-color: #ffe4e1; 
+            padding: 20px; 
+            color: #333; 
+        }
+        h1, h2 {
+            color: #d6336c;
+            text-align: center;
+        }
+        .card {
+            background-color: #fff0f5;
+            border: 2px solid #ffb6c1;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .input-field, .select-field {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 10px;
+            border: 1px solid #ffb6c1;
+            border-radius: 8px;
+            background-color: #fffafc;
+        }
+        .button {
+            padding: 12px 24px;
+            background-color: #ff69b4;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .button:hover {
+            background-color: #ff1493;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background-color: #fffafc;
+        }
+        th, td {
+            border: 1px solid #ffb6c1;
+            padding: 12px;
+            text-align: center;
+        }
+        th {
+            background-color: #ffc0cb;
+            color: #800000;
+        }
+        .action-btn {
+            margin: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+        }
+        .edit-btn {
+            background-color: #ffb6c1;
+            color: white;
+        }
+        .edit-btn:hover {
+            background-color: #ff1493;
+        }
+        .delete-btn {
+            background-color: #fa8072;
+            color: white;
+        }
+        .delete-btn:hover {
+            background-color: #e60026;
+        }
+    </style>
+</head>
+<body>
+    <h1>Order Tracking Dashboard</h1>
+
+    <div class="card">
+        <input type="text" class="input-field" id="orderId" placeholder="Order ID">
+        <input type="text" class="input-field" id="customerName" placeholder="Customer Name">
+        <input type="date" class="input-field" id="dateReceived">
+
+        <select class="select-field" id="currentStage">
+            <option value="Quotations">Quotations</option>
+            <option value="Transfers">Transfers</option>
+            <option value="Special Order Transfers">Special Order Transfers</option>
+            <option value="In Production">In Production</option>
+            <option value="Needs Certificates">Needs Certificates</option>
+            <option value="Waiting for Payment">Waiting for Payment</option>
+            <option value="Ready for Delivery/Pick Up">Ready for Delivery/Pick Up</option>
+        </select>
+
+        <select class="select-field" id="paymentStatus">
+            <option value="Paid">Paid</option>
+            <option value="Unpaid">Unpaid</option>
+        </select>
+
+        <input type="text" class="input-field" id="notes" placeholder="Notes/Comments">
+
+        <button class="button" onclick="addOrder()">Add Order</button>
+    </div>
+
+    <h2>All Orders</h2>
+    <table id="ordersTable">
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Date Received</th>
+                <th>Current Stage</th>
+                <th>Payment Status</th>
+                <th>Notes</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', loadOrders);
+
+        function addOrder() {
+            const order = {
+                id: document.getElementById('orderId').value,
+                customer: document.getElementById('customerName').value,
+                dateReceived: document.getElementById('dateReceived').value,
+                currentStage: document.getElementById('currentStage').value,
+                paymentStatus: document.getElementById('paymentStatus').value,
+                notes: document.getElementById('notes').value
+            };
+
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.push(order);
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            displayOrder(order);
+            clearForm();
+        }
+
+        function loadOrders() {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.forEach(order => displayOrder(order));
+        }
+
+        function displayOrder(order) {
+            const tableBody = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
+            const newRow = tableBody.insertRow();
+
+            newRow.innerHTML = `
+                <td>${order.id}</td>
+                <td>${order.customer}</td>
+                <td>${order.dateReceived}</td>
+                <td>${order.currentStage}</td>
+                <td>${order.paymentStatus}</td>
+                <td>${order.notes}</td>
+                <td>
+                    <button class="action-btn edit-btn" onclick="editOrder(this)">Edit</button>
+                    <button class="action-btn delete-btn" onclick="deleteOrder(this)">Delete</button>
+                </td>
+            `;
+        }
+
+        function clearForm() {
+            document.getElementById('orderId').value = '';
+            document.getElementById('customerName').value = '';
+            document.getElementById('dateReceived').value = '';
+            document.getElementById('currentStage').value = 'Quotations';
+            document.getElementById('paymentStatus').value = 'Unpaid';
+            document.getElementById('notes').value = '';
+        }
+
+        function editOrder(button) {
+            const row = button.parentElement.parentElement;
+            const cells = row.getElementsByTagName('td');
+
+            document.getElementById('orderId').value = cells[0].innerText;
+            document.getElementById('customerName').value = cells[1].innerText;
+            document.getElementById('dateReceived').value = cells[2].innerText;
+            document.getElementById('currentStage').value = cells[3].innerText;
+            document.getElementById('paymentStatus').value = cells[4].innerText;
+            document.getElementById('notes').value = cells[5].innerText;
+
+            deleteOrder(button);
+        }
+
+        function deleteOrder(button) {
+            const row = button.parentElement.parentElement;
+            const orderId = row.cells[0].innerText;
+            row.remove();
+
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const updatedOrders = orders.filter(order => order.id !== orderId);
+            localStorage.setItem('orders', JSON.stringify(updatedOrders));
+        }
+    </script>
+</body>
+</html>
