@@ -120,6 +120,7 @@
         <input type="text" class="input-field" id="notes" placeholder="Notes/Comments">
 
         <button class="button" onclick="addOrder()">Add Order</button>
+        <button class="button" onclick="toggleSortOrder()">Toggle Sort Order</button>
     </div>
 
     <h2>All Orders</h2>
@@ -139,6 +140,8 @@
     </table>
 
     <script>
+        let sortOrderDescending = true;
+
         document.addEventListener('DOMContentLoaded', loadOrders);
 
         function addOrder() {
@@ -168,7 +171,7 @@
             tableBody.innerHTML = '';
 
             const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            orders.sort((a, b) => new Date(a.dateReceived) - new Date(b.dateReceived));
+            orders.sort((a, b) => sortOrderDescending ? new Date(b.dateReceived) - new Date(a.dateReceived) : new Date(a.dateReceived) - new Date(b.dateReceived));
 
             orders.forEach((order, index) => {
                 const newRow = tableBody.insertRow();
@@ -188,6 +191,11 @@
                     </td>
                 `;
             });
+        }
+
+        function toggleSortOrder() {
+            sortOrderDescending = !sortOrderDescending;
+            displayOrders();
         }
 
         function getStageClass(stage) {
