@@ -168,6 +168,8 @@
             tableBody.innerHTML = '';
 
             const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.sort((a, b) => new Date(a.dateReceived) - new Date(b.dateReceived));
+
             orders.forEach((order, index) => {
                 const newRow = tableBody.insertRow();
                 const stageClass = getStageClass(order.currentStage);
