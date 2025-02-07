@@ -80,6 +80,15 @@
         .delete-btn:hover {
             background-color: #e60026;
         }
+
+        /* Color Coding for Order Stages */
+        .stage-Quotations { background-color: #fce4ec; }
+        .stage-Transfers { background-color: #e3f2fd; }
+        .stage-SpecialOrderTransfers { background-color: #f3e5f5; }
+        .stage-InProduction { background-color: #e8f5e9; }
+        .stage-NeedsCertificates { background-color: #fff9c4; }
+        .stage-WaitingForPayment { background-color: #ffe0b2; }
+        .stage-ReadyForDelivery { background-color: #dcedc8; }
     </style>
 </head>
 <body>
@@ -156,6 +165,9 @@
             const tableBody = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
             const newRow = tableBody.insertRow();
 
+            const stageClass = getStageClass(order.currentStage);
+            newRow.classList.add(stageClass);
+
             newRow.innerHTML = `
                 <td>${order.id}</td>
                 <td>${order.customer}</td>
@@ -168,6 +180,18 @@
                     <button class="action-btn delete-btn" onclick="deleteOrder(this)">Delete</button>
                 </td>
             `;
+        }
+
+        function getStageClass(stage) {
+            return {
+                'Quotations': 'stage-Quotations',
+                'Transfers': 'stage-Transfers',
+                'Special Order Transfers': 'stage-SpecialOrderTransfers',
+                'In Production': 'stage-InProduction',
+                'Needs Certificates': 'stage-NeedsCertificates',
+                'Waiting for Payment': 'stage-WaitingForPayment',
+                'Ready for Delivery/Pick Up': 'stage-ReadyForDelivery'
+            }[stage] || '';
         }
 
         function clearForm() {
