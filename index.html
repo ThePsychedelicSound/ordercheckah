@@ -151,7 +151,8 @@
                 dateReceived: document.getElementById('dateReceived').value,
                 currentStage: document.getElementById('currentStage').value,
                 paymentStatus: document.getElementById('paymentStatus').value,
-                notes: document.getElementById('notes').value
+                notes: document.getElementById('notes').value,
+                orderId: Date.now() // Unique identifier for each order
             };
 
             const orders = JSON.parse(localStorage.getItem('orders')) || [];
@@ -173,7 +174,7 @@
             const orders = JSON.parse(localStorage.getItem('orders')) || [];
             orders.sort((a, b) => sortOrderDescending ? new Date(b.dateReceived) - new Date(a.dateReceived) : new Date(a.dateReceived) - new Date(b.dateReceived));
 
-            orders.forEach((order, index) => {
+            orders.forEach(order => {
                 const newRow = tableBody.insertRow();
                 const stageClass = getStageClass(order.currentStage);
                 newRow.classList.add(stageClass);
@@ -186,8 +187,8 @@
                     <td>${order.paymentStatus}</td>
                     <td>${order.notes}</td>
                     <td>
-                        <button class="action-btn edit-btn" onclick="editOrder(${index})">Edit</button>
-                        <button class="action-btn delete-btn" onclick="deleteOrder(${index})">Delete</button>
+                        <button class="action-btn edit-btn" onclick="editOrder(${order.orderId})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deleteOrder(${order.orderId})">Delete</button>
                     </td>
                 `;
             });
@@ -219,9 +220,9 @@
             document.getElementById('notes').value = '';
         }
 
-        function editOrder(index) {
+        function editOrder(orderId) {
             const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            const order = orders[index];
+            const order = orders.find(o => o.orderId === orderId);
 
             document.getElementById('orderId').value = order.id;
             document.getElementById('customerName').value = order.customer;
@@ -230,12 +231,12 @@
             document.getElementById('paymentStatus').value = order.paymentStatus;
             document.getElementById('notes').value = order.notes;
 
-            deleteOrder(index);
+            deleteOrder(orderId);
         }
 
-        function deleteOrder(index) {
-            const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            orders.splice(index, 1);
+        function deleteOrder(orderId) {
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders = orders.filter(order => order.orderId !== orderId);
             localStorage.setItem('orders', JSON.stringify(orders));
             displayOrders();
         }
