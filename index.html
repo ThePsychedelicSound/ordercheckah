@@ -95,6 +95,7 @@
     <h1>Order Tracking Dashboard</h1>
 
     <div class="card">
+        <input type="text" class="input-field" id="searchBar" placeholder="Search by Order ID or Customer" onkeyup="searchOrders()">
         <input type="text" class="input-field" id="orderId" placeholder="Order ID">
         <input type="text" class="input-field" id="customerName" placeholder="Customer Name">
         <input type="date" class="input-field" id="dateReceived">
@@ -113,6 +114,7 @@
             <option value="Paid">Paid</option>
             <option value="Unpaid">Unpaid</option>
             <option value="Charged to Account">Charged to Account</option>
+            <option value="N/A">N/A</option>
         </select>
 
         <input type="text" class="input-field" id="notes" placeholder="Notes/Comments">
@@ -204,28 +206,15 @@
             document.getElementById('notes').value = '';
         }
 
-        function editOrder(button) {
-            const row = button.parentElement.parentElement;
-            const cells = row.getElementsByTagName('td');
+        function searchOrders() {
+            const input = document.getElementById('searchBar').value.toLowerCase();
+            const rows = document.querySelectorAll('#ordersTable tbody tr');
 
-            document.getElementById('orderId').value = cells[0].innerText;
-            document.getElementById('customerName').value = cells[1].innerText;
-            document.getElementById('dateReceived').value = cells[2].innerText;
-            document.getElementById('currentStage').value = cells[3].innerText;
-            document.getElementById('paymentStatus').value = cells[4].innerText;
-            document.getElementById('notes').value = cells[5].innerText;
-
-            deleteOrder(button);
-        }
-
-        function deleteOrder(button) {
-            const row = button.parentElement.parentElement;
-            const orderId = row.cells[0].innerText;
-            row.remove();
-
-            const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            const updatedOrders = orders.filter(order => order.id !== orderId);
-            localStorage.setItem('orders', JSON.stringify(updatedOrders));
+            rows.forEach(row => {
+                const orderId = row.cells[0].innerText.toLowerCase();
+                const customer = row.cells[1].innerText.toLowerCase();
+                row.style.display = orderId.includes(input) || customer.includes(input) ? '' : 'none';
+            });
         }
     </script>
 </body>
