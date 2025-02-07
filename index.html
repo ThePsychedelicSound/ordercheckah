@@ -155,34 +155,37 @@
             orders.push(order);
             localStorage.setItem('orders', JSON.stringify(orders));
 
-            displayOrder(order);
+            displayOrders();
             clearForm();
         }
 
         function loadOrders() {
-            const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            orders.forEach(order => displayOrder(order));
+            displayOrders();
         }
 
-        function displayOrder(order) {
+        function displayOrders() {
             const tableBody = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
-            const newRow = tableBody.insertRow();
+            tableBody.innerHTML = '';
 
-            const stageClass = getStageClass(order.currentStage);
-            newRow.classList.add(stageClass);
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.forEach((order, index) => {
+                const newRow = tableBody.insertRow();
+                const stageClass = getStageClass(order.currentStage);
+                newRow.classList.add(stageClass);
 
-            newRow.innerHTML = `
-                <td>${order.id}</td>
-                <td>${order.customer}</td>
-                <td>${order.dateReceived}</td>
-                <td>${order.currentStage}</td>
-                <td>${order.paymentStatus}</td>
-                <td>${order.notes}</td>
-                <td>
-                    <button class="action-btn edit-btn" onclick="editOrder(this)">Edit</button>
-                    <button class="action-btn delete-btn" onclick="deleteOrder(this)">Delete</button>
-                </td>
-            `;
+                newRow.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.dateReceived}</td>
+                    <td>${order.currentStage}</td>
+                    <td>${order.paymentStatus}</td>
+                    <td>${order.notes}</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editOrder(${index})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deleteOrder(${index})">Delete</button>
+                    </td>
+                `;
+            });
         }
 
         function getStageClass(stage) {
@@ -204,6 +207,27 @@
             document.getElementById('currentStage').value = 'Quotations';
             document.getElementById('paymentStatus').value = 'Unpaid';
             document.getElementById('notes').value = '';
+        }
+
+        function editOrder(index) {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const order = orders[index];
+
+            document.getElementById('orderId').value = order.id;
+            document.getElementById('customerName').value = order.customer;
+            document.getElementById('dateReceived').value = order.dateReceived;
+            document.getElementById('currentStage').value = order.currentStage;
+            document.getElementById('paymentStatus').value = order.paymentStatus;
+            document.getElementById('notes').value = order.notes;
+
+            deleteOrder(index);
+        }
+
+        function deleteOrder(index) {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.splice(index, 1);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            displayOrders();
         }
 
         function searchOrders() {
