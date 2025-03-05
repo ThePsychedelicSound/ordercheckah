@@ -134,7 +134,7 @@
         function saveData() {
             localStorage.setItem("orders", JSON.stringify(orders));
             localStorage.setItem("completedOrders", JSON.stringify(completedOrders));
-            localStorage.setItem("totalSales", totalSales);
+            localStorage.setItem("totalSales", totalSales.toFixed(2));
         }
 
         function addOrder() {
@@ -166,13 +166,18 @@
                         <td>${order.notes}</td>
                         <td>${order.status}</td>
                         <td>
-                            <button onclick="editOrder(${index})">Edit</button>
                             <button onclick="deleteOrder(${index})">Delete</button>
                             <button onclick="completeOrder(${index})">Complete</button>
                         </td>
                     </tr>
                 `;
             });
+        }
+
+        function deleteOrder(index) {
+            orders.splice(index, 1);
+            saveData();
+            renderOrders();
         }
 
         function completeOrder(index) {
@@ -186,23 +191,10 @@
         }
 
         function renderCompletedOrders() {
-            const completedList = document.getElementById("completedOrders");
-            completedList.innerHTML = "";
-            completedOrders.forEach(order => {
-                completedList.innerHTML += `
-                    <tr>
-                        <td>${order.date}</td>
-                        <td>${order.customerId}</td>
-                        <td>${order.customerName}</td>
-                        <td>${order.orderNumber}</td>
-                        <td>$${order.saleAmount.toFixed(2)}</td>
-                    </tr>
-                `;
-            });
+            document.getElementById("totalSales").innerText = totalSales.toFixed(2);
         }
         renderOrders();
         renderCompletedOrders();
-        document.getElementById("totalSales").innerText = totalSales.toFixed(2);
     </script>
 </body>
 </html>
