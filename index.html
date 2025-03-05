@@ -127,9 +127,15 @@
     <div class="total-sales">Total Sales: $<span id="totalSales">0</span></div>
     
     <script>
-        let orders = [];
-        let completedOrders = [];
-        let totalSales = 0;
+        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+        let completedOrders = JSON.parse(localStorage.getItem("completedOrders")) || [];
+        let totalSales = parseFloat(localStorage.getItem("totalSales")) || 0;
+
+        function saveData() {
+            localStorage.setItem("orders", JSON.stringify(orders));
+            localStorage.setItem("completedOrders", JSON.stringify(completedOrders));
+            localStorage.setItem("totalSales", totalSales);
+        }
 
         function addOrder() {
             const order = {
@@ -142,6 +148,7 @@
                 status: document.getElementById("orderStatus").value
             };
             orders.push(order);
+            saveData();
             renderOrders();
         }
 
@@ -168,32 +175,34 @@
             });
         }
 
-        function editOrder(index) {
-            const order = orders[index];
-            document.getElementById("date").value = order.date;
-            document.getElementById("customerId").value = order.customerId;
-            document.getElementById("customerName").value = order.customerName;
-            document.getElementById("orderNumber").value = order.orderNumber;
-            document.getElementById("saleAmount").value = order.saleAmount;
-            document.getElementById("orderNotes").value = order.notes;
-            document.getElementById("orderStatus").value = order.status;
-            orders.splice(index, 1);
-            renderOrders();
-        }
-
-        function deleteOrder(index) {
-            orders.splice(index, 1);
-            renderOrders();
-        }
-
         function completeOrder(index) {
             totalSales += orders[index].saleAmount;
             completedOrders.push(orders[index]);
             orders.splice(index, 1);
+            saveData();
             renderOrders();
             renderCompletedOrders();
             document.getElementById("totalSales").innerText = totalSales.toFixed(2);
         }
+
+        function renderCompletedOrders() {
+            const completedList = document.getElementById("completedOrders");
+            completedList.innerHTML = "";
+            completedOrders.forEach(order => {
+                completedList.innerHTML += `
+                    <tr>
+                        <td>${order.date}</td>
+                        <td>${order.customerId}</td>
+                        <td>${order.customerName}</td>
+                        <td>${order.orderNumber}</td>
+                        <td>$${order.saleAmount.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+        }
+        renderOrders();
+        renderCompletedOrders();
+        document.getElementById("totalSales").innerText = totalSales.toFixed(2);
     </script>
 </body>
 </html>
