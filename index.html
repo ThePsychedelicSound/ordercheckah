@@ -40,6 +40,13 @@
             margin-bottom: 20px;
         }
 
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
         .button {
             padding: 8px 16px;
             background-color: var(--button-bg);
@@ -75,6 +82,8 @@
             width: 100%;
             border-collapse: collapse;
             background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
         th {
@@ -92,13 +101,27 @@
         tr:hover {
             background-color: var(--table-hover);
         }
+
+        .pagination {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .top-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <h1>Order Tracking Dashboard</h1>
 
-    <button class="button" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    <div class="top-controls">
+        <button class="button" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+    </div>
 
     <div class="card">
         <input type="text" class="input-field" id="orderId" placeholder="Order ID">
@@ -117,7 +140,7 @@
             <option value="Ready for Pick Up/Delivery">Ready for Pick Up/Delivery</option>
             <option value="Completed">Completed</option>
         </select>
-        <button class="button" id="addOrderBtn" onclick="addOrder()">Add Order</button>
+        <button class="button" onclick="addOrder()">Add Order</button>
     </div>
 
     <h2>All Orders</h2>
@@ -137,18 +160,45 @@
         <tbody id="ordersTable"></tbody>
     </table>
 
-    <script>
-        let orders = JSON.parse(localStorage.getItem("orders")) || [];
+    <h2>Completed Orders</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Account</th>
+                <th>Date</th>
+                <th>Total Amount</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody id="completedOrdersTable"></tbody>
+    </table>
 
-        function saveOrders() {
-            localStorage.setItem("orders", JSON.stringify(orders));
+    <h2 id="totalSales">Total Sales: $0.00</h2>
+
+    <script>
+        let orders = [];
+
+        function addOrder() {
+            let order = {
+                id: document.getElementById("orderId").value,
+                customer: document.getElementById("customerName").value,
+                account: document.getElementById("customerAccount").value,
+                date: document.getElementById("dateReceived").value,
+                amount: parseFloat(document.getElementById("totalAmount").value) || 0,
+                notes: document.getElementById("orderNotes").value,
+                status: document.getElementById("orderStatus").value
+            };
+            orders.push(order);
+            displayOrders();
         }
 
         function displayOrders() {
-            let table = document.getElementById("ordersTable");
-            table.innerHTML = "";
+            let ordersTable = document.getElementById("ordersTable");
+            ordersTable.innerHTML = "";
             orders.forEach((order, index) => {
-                let row = table.insertRow();
+                let row = ordersTable.insertRow();
                 row.innerHTML = `
                     <td>${order.id}</td>
                     <td>${order.customer}</td>
@@ -158,52 +208,34 @@
                     <td>${order.notes || "—"}</td>
                     <td>${order.status}</td>
                     <td>
+                        <button class="button" onclick="editOrder(${index})">Edit</button>
+                        <button class="button" onclick="completeOrder(${index})">Complete</button>
                         <button class="button" onclick="deleteOrder(${index})">Delete</button>
                     </td>
                 `;
             });
         }
 
-        function addOrder() {
-            let orderId = document.getElementById("orderId").value.trim();
-            let customerName = document.getElementById("customerName").value.trim();
-            let account = document.getElementById("customerAccount").value.trim();
-            let date = document.getElementById("dateReceived").value.trim();
-            let amount = parseFloat(document.getElementById("totalAmount").value);
-            let status = document.getElementById("orderStatus").value;
-            let notes = document.getElementById("orderNotes").value.trim();
-
-            if (!orderId || !customerName || !account || !date || isNaN(amount)) {
-                alert("Please fill out all required fields correctly.");
-                return;
-            }
-
-            let order = { id: orderId, customer: customerName, account, date, amount, notes, status };
-            orders.push(order);
-            saveOrders();
-            displayOrders();
-
-            // Clear input fields after adding an order
-            document.getElementById("orderId").value = "";
-            document.getElementById("customerName").value = "";
-            document.getElementById("customerAccount").value = "";
-            document.getElementById("dateReceived").value = "";
-            document.getElementById("totalAmount").value = "";
-            document.getElementById("orderNotes").value = "";
-            document.getElementById("orderStatus").value = "Quotation";
+        function editOrder(index) {
+            let order = orders[index];
+            document.getElementById("orderId").value = order.id;
+            document.getElementById("customerName").value = order.customer;
+            document.getElementById("customerAccount").value = order.account;
+            document.getElementById("dateReceived").value = order.date;
+            document.getElementById("totalAmount").value = order.amount;
+            document.getElementById("orderNotes").value = order.notes;
+            document.getElementById("orderStatus").value = order.status;
         }
 
         function deleteOrder(index) {
             orders.splice(index, 1);
-            saveOrders();
             displayOrders();
         }
 
-        function toggleDarkMode() {
-            document.body.classList.toggle("dark-mode");
+        function completeOrder(index) {
+            orders.splice(index, 1);
+            displayOrders();
         }
-
-        document.addEventListener("DOMContentLoaded", displayOrders);
     </script>
 
 </body>
