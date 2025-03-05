@@ -4,253 +4,205 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Tracking Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <style>
-        body { 
-            font-family: 'Comic Sans MS', cursive, sans-serif; 
-            background-color: #ffe4e1; 
-            padding: 20px; 
-            color: #333; 
+        :root {
+            --bg-color: #f4f4f4;
+            --text-color: #333;
+            --card-bg: #ffffff;
+            --button-bg: #007bff;
+            --button-hover: #0056b3;
+            --table-header: #007bff;
+            --table-hover: #f1f1f1;
         }
-        h1, h2 {
-            color: #d6336c;
-            text-align: center;
+
+        body.dark-mode {
+            --bg-color: #181818;
+            --text-color: #f4f4f4;
+            --card-bg: #252525;
+            --button-bg: #ff4081;
+            --button-hover: #c60055;
+            --table-header: #ff4081;
+            --table-hover: #333;
         }
-        .card {
-            background-color: #fff0f5;
-            border: 2px solid #ffb6c1;
-            border-radius: 12px;
+
+        body {
+            font-family: "Arial", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
             padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
             margin-bottom: 20px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .input-field, .select-field {
-            display: block;
-            width: 100%;
-            margin: 10px 0;
-            padding: 10px;
-            border: 1px solid #ffb6c1;
-            border-radius: 8px;
-            background-color: #fffafc;
+
+        .top-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
         }
+
         .button {
-            padding: 12px 24px;
-            background-color: #ff69b4;
+            padding: 10px 20px;
+            background-color: var(--button-bg);
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 5px;
             cursor: pointer;
-            font-weight: bold;
+            transition: 0.3s;
         }
+
         .button:hover {
-            background-color: #ff1493;
+            background-color: var(--button-hover);
         }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .input-field, .select-field, .notes-field {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
-            background-color: #fffafc;
-        }
-        th, td {
-            border: 1px solid #ffb6c1;
-            padding: 12px;
-            text-align: center;
-        }
-        th {
-            background-color: #ffc0cb;
-            color: #800000;
-        }
-        .action-btn {
-            margin: 5px;
-            padding: 8px 16px;
-            cursor: pointer;
-            border: none;
-            border-radius: 12px;
-        }
-        .edit-btn {
-            background-color: #ffb6c1;
-            color: white;
-        }
-        .edit-btn:hover {
-            background-color: #ff1493;
-        }
-        .delete-btn {
-            background-color: #fa8072;
-            color: white;
-        }
-        .delete-btn:hover {
-            background-color: #e60026;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
         }
 
-        /* Color Coding for Order Stages */
-        .stage-Quotations { background-color: #fce4ec; }
-        .stage-Transfers { background-color: #e3f2fd; }
-        .stage-SpecialOrderTransfers { background-color: #f3e5f5; }
-        .stage-InProduction { background-color: #e8f5e9; }
-        .stage-NeedsCertificates { background-color: #fff9c4; }
-        .stage-WaitingForPayment { background-color: #ffe0b2; }
-        .stage-ReadyForDelivery { background-color: #dcedc8; }
+        th {
+            background-color: var(--table-header);
+            color: white;
+            padding: 10px;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ccc;
+        }
+
+        tr:hover {
+            background-color: var(--table-hover);
+        }
+
+        .pagination {
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .top-controls {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
     </style>
 </head>
 <body>
+
     <h1>Order Tracking Dashboard</h1>
 
+    <div class="top-controls">
+        <button class="button" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+        <button class="button" onclick="logout()">Logout</button>
+    </div>
+
     <div class="card">
-        <input type="text" class="input-field" id="searchBar" placeholder="Search by Order ID or Customer" onkeyup="searchOrders()">
         <input type="text" class="input-field" id="orderId" placeholder="Order ID">
         <input type="text" class="input-field" id="customerName" placeholder="Customer Name">
+        <input type="text" class="input-field" id="customerAccount" placeholder="Customer Account">
         <input type="date" class="input-field" id="dateReceived">
-
-        <select class="select-field" id="currentStage">
-            <option value="Quotations">Quotations</option>
-            <option value="Transfers">Transfers</option>
-            <option value="Special Order Transfers">Special Order Transfers</option>
+        <input type="number" class="input-field" id="totalAmount" placeholder="Total $ Amount">
+        <textarea class="notes-field" id="orderNotes" placeholder="Add any notes (optional)"></textarea>
+        <select class="select-field" id="orderStatus">
+            <option value="Quotation">Quotation</option>
+            <option value="Waiting for Pricing">Waiting for Pricing</option>
+            <option value="Transfer">Transfer</option>
             <option value="In Production">In Production</option>
             <option value="Needs Certificates">Needs Certificates</option>
-            <option value="Waiting for Payment">Waiting for Payment</option>
-            <option value="Ready for Delivery/Pick Up">Ready for Delivery/Pick Up</option>
+            <option value="Needs PO">Needs PO</option>
+            <option value="Ready for Pick Up/Delivery">Ready for Pick Up/Delivery</option>
+            <option value="Completed">Completed</option>
         </select>
-
-        <select class="select-field" id="paymentStatus">
-            <option value="Paid">Paid</option>
-            <option value="Unpaid">Unpaid</option>
-            <option value="Charged to Account">Charged to Account</option>
-            <option value="N/A">N/A</option>
-        </select>
-
-        <input type="text" class="input-field" id="notes" placeholder="Notes/Comments">
-
         <button class="button" onclick="addOrder()">Add Order</button>
-        <button class="button" onclick="toggleSortOrder()">Toggle Sort Order</button>
     </div>
 
     <h2>All Orders</h2>
-    <table id="ordersTable">
+    <table>
         <thead>
             <tr>
                 <th>Order ID</th>
                 <th>Customer</th>
-                <th>Date Received</th>
-                <th>Current Stage</th>
-                <th>Payment Status</th>
+                <th>Account</th>
+                <th>Date</th>
+                <th>Total Amount</th>
                 <th>Notes</th>
-                <th>Actions</th>
+                <th>Status</th>
             </tr>
         </thead>
-        <tbody></tbody>
+        <tbody id="ordersTable"></tbody>
     </table>
 
-    <script>
-        let sortOrderDescending = true;
+    <h2>Completed Orders</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Account</th>
+                <th>Date</th>
+                <th>Total Amount</th>
+                <th>Notes</th>
+            </tr>
+        </thead>
+        <tbody id="completedOrdersTable"></tbody>
+    </table>
 
-        document.addEventListener('DOMContentLoaded', loadOrders);
+    <h2 id="totalSales">Total Sales: $0.00</h2>
+
+    <script>
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
+        }
 
         function addOrder() {
-            const order = {
-                id: document.getElementById('orderId').value,
-                customer: document.getElementById('customerName').value,
-                dateReceived: document.getElementById('dateReceived').value,
-                currentStage: document.getElementById('currentStage').value,
-                paymentStatus: document.getElementById('paymentStatus').value,
-                notes: document.getElementById('notes').value,
-                orderId: Date.now() // Unique identifier for each order
-            };
-
-            const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            orders.push(order);
-            localStorage.setItem('orders', JSON.stringify(orders));
-
-            displayOrders();
-            clearForm();
+            let ordersTable = document.getElementById("ordersTable");
+            let row = ordersTable.insertRow();
+            row.innerHTML = `
+                <td>${document.getElementById('orderId').value}</td>
+                <td>${document.getElementById('customerName').value}</td>
+                <td>${document.getElementById('customerAccount').value}</td>
+                <td>${document.getElementById('dateReceived').value}</td>
+                <td>$${parseFloat(document.getElementById('totalAmount').value).toFixed(2)}</td>
+                <td>${document.getElementById('orderNotes').value || "—"}</td>
+                <td>${document.getElementById('orderStatus').value}</td>
+            `;
         }
 
-        function loadOrders() {
-            displayOrders();
-        }
-
-        function displayOrders() {
-            const tableBody = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
-            tableBody.innerHTML = '';
-
-            const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            orders.sort((a, b) => sortOrderDescending ? new Date(b.dateReceived) - new Date(a.dateReceived) : new Date(a.dateReceived) - new Date(b.dateReceived));
-
-            orders.forEach(order => {
-                const newRow = tableBody.insertRow();
-                const stageClass = getStageClass(order.currentStage);
-                newRow.classList.add(stageClass);
-
-                newRow.innerHTML = `
-                    <td>${order.id}</td>
-                    <td>${order.customer}</td>
-                    <td>${order.dateReceived}</td>
-                    <td>${order.currentStage}</td>
-                    <td>${order.paymentStatus}</td>
-                    <td>${order.notes}</td>
-                    <td>
-                        <button class="action-btn edit-btn" onclick="editOrder(${order.orderId})">Edit</button>
-                        <button class="action-btn delete-btn" onclick="deleteOrder(${order.orderId})">Delete</button>
-                    </td>
-                `;
-            });
-        }
-
-        function toggleSortOrder() {
-            sortOrderDescending = !sortOrderDescending;
-            displayOrders();
-        }
-
-        function getStageClass(stage) {
-            return {
-                'Quotations': 'stage-Quotations',
-                'Transfers': 'stage-Transfers',
-                'Special Order Transfers': 'stage-SpecialOrderTransfers',
-                'In Production': 'stage-InProduction',
-                'Needs Certificates': 'stage-NeedsCertificates',
-                'Waiting for Payment': 'stage-WaitingForPayment',
-                'Ready for Delivery/Pick Up': 'stage-ReadyForDelivery'
-            }[stage] || '';
-        }
-
-        function clearForm() {
-            document.getElementById('orderId').value = '';
-            document.getElementById('customerName').value = '';
-            document.getElementById('dateReceived').value = '';
-            document.getElementById('currentStage').value = 'Quotations';
-            document.getElementById('paymentStatus').value = 'Unpaid';
-            document.getElementById('notes').value = '';
-        }
-
-        function editOrder(orderId) {
-            const orders = JSON.parse(localStorage.getItem('orders')) || [];
-            const order = orders.find(o => o.orderId === orderId);
-
-            document.getElementById('orderId').value = order.id;
-            document.getElementById('customerName').value = order.customer;
-            document.getElementById('dateReceived').value = order.dateReceived;
-            document.getElementById('currentStage').value = order.currentStage;
-            document.getElementById('paymentStatus').value = order.paymentStatus;
-            document.getElementById('notes').value = order.notes;
-
-            deleteOrder(orderId);
-        }
-
-        function deleteOrder(orderId) {
-            let orders = JSON.parse(localStorage.getItem('orders')) || [];
-            orders = orders.filter(order => order.orderId !== orderId);
-            localStorage.setItem('orders', JSON.stringify(orders));
-            displayOrders();
-        }
-
-        function searchOrders() {
-            const input = document.getElementById('searchBar').value.toLowerCase();
-            const rows = document.querySelectorAll('#ordersTable tbody tr');
-
-            rows.forEach(row => {
-                const orderId = row.cells[0].innerText.toLowerCase();
-                const customer = row.cells[1].innerText.toLowerCase();
-                row.style.display = orderId.includes(input) || customer.includes(input) ? '' : 'none';
-            });
-        }
+        document.addEventListener("DOMContentLoaded", () => {
+            if (localStorage.getItem("darkMode") === "true") {
+                document.body.classList.add("dark-mode");
+            }
+        });
     </script>
+
 </body>
 </html>
