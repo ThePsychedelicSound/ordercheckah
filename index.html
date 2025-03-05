@@ -189,7 +189,7 @@
             let customerName = document.getElementById("customerName").value.trim();
             let account = document.getElementById("customerAccount").value.trim();
             let date = document.getElementById("dateReceived").value.trim();
-            let amount = parseFloat(document.getElementById("totalAmount").value) || 0;
+            let amount = parseFloat(document.getElementById("totalAmount").value);
             let status = document.getElementById("orderStatus").value;
 
             if (!orderId || !customerName || !account || !date || isNaN(amount)) {
