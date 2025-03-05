@@ -137,27 +137,8 @@
         <tbody id="ordersTable"></tbody>
     </table>
 
-    <h2>Completed Orders</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Order ID</th>
-                <th>Customer</th>
-                <th>Account</th>
-                <th>Date</th>
-                <th>Total Amount</th>
-                <th>Notes</th>
-            </tr>
-        </thead>
-        <tbody id="completedOrdersTable"></tbody>
-    </table>
-
-    <h2 id="totalSales">Total Sales: $0.00</h2>
-
     <script>
         let orders = JSON.parse(localStorage.getItem("orders")) || [];
-        let completedOrders = JSON.parse(localStorage.getItem("completedOrders")) || [];
-        let totalSales = parseFloat(localStorage.getItem("totalSales")) || 0;
 
         function saveOrders() {
             localStorage.setItem("orders", JSON.stringify(orders));
@@ -177,7 +158,6 @@
                     <td>${order.notes || "—"}</td>
                     <td>${order.status}</td>
                     <td>
-                        <button class="button" onclick="completeOrder(${index})">Complete</button>
                         <button class="button" onclick="deleteOrder(${index})">Delete</button>
                     </td>
                 `;
@@ -191,27 +171,26 @@
             let date = document.getElementById("dateReceived").value.trim();
             let amount = parseFloat(document.getElementById("totalAmount").value);
             let status = document.getElementById("orderStatus").value;
+            let notes = document.getElementById("orderNotes").value.trim();
 
             if (!orderId || !customerName || !account || !date || isNaN(amount)) {
                 alert("Please fill out all required fields correctly.");
                 return;
             }
 
-            let order = { id: orderId, customer: customerName, account, date, amount, notes: document.getElementById("orderNotes").value, status };
-
+            let order = { id: orderId, customer: customerName, account, date, amount, notes, status };
             orders.push(order);
             saveOrders();
             displayOrders();
-        }
 
-        function completeOrder(index) {
-            let order = orders.splice(index, 1)[0];
-            completedOrders.push(order);
-            totalSales += order.amount;
-            localStorage.setItem("completedOrders", JSON.stringify(completedOrders));
-            localStorage.setItem("totalSales", totalSales.toFixed(2));
-            saveOrders();
-            displayOrders();
+            // Clear input fields after adding an order
+            document.getElementById("orderId").value = "";
+            document.getElementById("customerName").value = "";
+            document.getElementById("customerAccount").value = "";
+            document.getElementById("dateReceived").value = "";
+            document.getElementById("totalAmount").value = "";
+            document.getElementById("orderNotes").value = "";
+            document.getElementById("orderStatus").value = "Quotation";
         }
 
         function deleteOrder(index) {
