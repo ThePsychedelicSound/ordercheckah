@@ -3,198 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Tracker</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Order Tracking Dashboard</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-            text-align: center;
+        body { 
+            font-family: 'Comic Sans MS', cursive, sans-serif; 
+            background-color: #ffe4e1; 
+            padding: 20px; 
+            color: #333; 
         }
         h1, h2 {
-            color: #333;
+            color: #d6336c;
+            text-align: center;
         }
-        .order-form {
-            background: #fff;
+        .card {
+            background-color: #fff0f5;
+            border: 2px solid #ffb6c1;
+            border-radius: 12px;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             margin-bottom: 20px;
-            display: inline-block;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        input, select, textarea, button {
+        .input-field, .select-field {
             display: block;
-            margin: 10px auto;
+            width: 100%;
+            margin: 10px 0;
             padding: 10px;
-            width: 80%;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+            border: 1px solid #ffb6c1;
+            border-radius: 8px;
+            background-color: #fffafc;
         }
-        button {
-            background-color: #28a745;
+        .button {
+            padding: 12px 24px;
+            background-color: #ff69b4;
             color: white;
             border: none;
+            border-radius: 20px;
             cursor: pointer;
+            font-weight: bold;
         }
-        button:hover {
-            background-color: #218838;
+        .button:hover {
+            background-color: #ff1493;
         }
         table {
-            width: 90%;
-            margin: 20px auto;
+            width: 100%;
             border-collapse: collapse;
-            background: white;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-            border-radius: 8px;
-            overflow: hidden;
+            margin-top: 20px;
+            background-color: #fffafc;
         }
         th, td {
+            border: 1px solid #ffb6c1;
             padding: 12px;
-            border: 1px solid #ddd;
             text-align: center;
         }
         th {
-            background-color: #007bff;
+            background-color: #ffc0cb;
+            color: #800000;
+        }
+        .action-btn {
+            margin: 5px;
+            padding: 8px 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 12px;
+        }
+        .edit-btn {
+            background-color: #ffb6c1;
             color: white;
         }
-        tr:nth-child(even) {
-            background-color: #f2f2f2;
+        .edit-btn:hover {
+            background-color: #ff1493;
         }
-        .total-sales {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 20px;
+        .delete-btn {
+            background-color: #fa8072;
+            color: white;
         }
+        .delete-btn:hover {
+            background-color: #e60026;
+        }
+
+        /* Color Coding for Order Stages */
+        .stage-Quotations { background-color: #fce4ec; }
+        .stage-Transfers { background-color: #e3f2fd; }
+        .stage-SpecialOrderTransfers { background-color: #f3e5f5; }
+        .stage-InProduction { background-color: #e8f5e9; }
+        .stage-NeedsCertificates { background-color: #fff9c4; }
+        .stage-WaitingForPayment { background-color: #ffe0b2; }
+        .stage-ReadyForDelivery { background-color: #dcedc8; }
     </style>
 </head>
 <body>
-    <h1>Order Tracker</h1>
-    
-    <div class="order-form">
-        <h2>Add New Order</h2>
-        <input type="date" id="date" required>
-        <input type="text" id="customerId" placeholder="Customer ID" required>
-        <input type="text" id="customerName" placeholder="Customer Name" required>
-        <input type="text" id="orderNumber" placeholder="Order Number" required>
-        <input type="number" id="saleAmount" placeholder="Sale Amount" required>
-        <textarea id="orderNotes" placeholder="Notes (optional)"></textarea>
-        <select id="orderStatus">
-            <option>Quotation</option>
-            <option>Waiting for Pricing</option>
-            <option>Transfer</option>
-            <option>In Production</option>
-            <option>Need Certificates</option>
-            <option>Need PO</option>
-            <option>Need Payment</option>
-            <option>Ready for Pick Up/Delivery</option>
+    <h1>Order Tracking Dashboard</h1>
+
+    <div class="card">
+        <input type="text" class="input-field" id="searchBar" placeholder="Search by Order ID or Customer" onkeyup="searchOrders()">
+        <input type="text" class="input-field" id="orderId" placeholder="Order ID">
+        <input type="text" class="input-field" id="customerName" placeholder="Customer Name">
+        <input type="date" class="input-field" id="dateReceived">
+
+        <select class="select-field" id="currentStage">
+            <option value="Quotations">Quotations</option>
+            <option value="Transfers">Transfers</option>
+            <option value="Special Order Transfers">Special Order Transfers</option>
+            <option value="In Production">In Production</option>
+            <option value="Needs Certificates">Needs Certificates</option>
+            <option value="Waiting for Payment">Waiting for Payment</option>
+            <option value="Ready for Delivery/Pick Up">Ready for Delivery/Pick Up</option>
         </select>
-        <button onclick="addOrder()">Add Order</button>
+
+        <select class="select-field" id="paymentStatus">
+            <option value="Paid">Paid</option>
+            <option value="Unpaid">Unpaid</option>
+            <option value="Charged to Account">Charged to Account</option>
+            <option value="N/A">N/A</option>
+        </select>
+
+        <input type="text" class="input-field" id="notes" placeholder="Notes/Comments">
+
+        <button class="button" onclick="addOrder()">Add Order</button>
+        <button class="button" onclick="toggleSortOrder()">Toggle Sort Order</button>
     </div>
-    
-    <h2>Active Orders</h2>
-    <table>
+
+    <h2>All Orders</h2>
+    <table id="ordersTable">
         <thead>
             <tr>
-                <th>Date</th>
-                <th>Customer ID</th>
-                <th>Customer Name</th>
-                <th>Order Number</th>
-                <th>Sale Amount</th>
+                <th>Order ID</th>
+                <th>Customer</th>
+                <th>Date Received</th>
+                <th>Current Stage</th>
+                <th>Payment Status</th>
                 <th>Notes</th>
-                <th>Status</th>
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="orderList"></tbody>
+        <tbody></tbody>
     </table>
-    
-    <h2>Completed Orders</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Date</th>
-                <th>Customer ID</th>
-                <th>Customer Name</th>
-                <th>Order Number</th>
-                <th>Sale Amount</th>
-            </tr>
-        </thead>
-        <tbody id="completedOrders"></tbody>
-    </table>
-    
-    <div class="total-sales">Total Sales: $<span id="totalSales">0</span></div>
-    
-    <script>
-        let orders = JSON.parse(localStorage.getItem("orders")) || [];
-        let completedOrders = JSON.parse(localStorage.getItem("completedOrders")) || [];
-        let totalSales = parseFloat(localStorage.getItem("totalSales")) || 0;
 
-        function saveData() {
-            localStorage.setItem("orders", JSON.stringify(orders));
-            localStorage.setItem("completedOrders", JSON.stringify(completedOrders));
-            localStorage.setItem("totalSales", totalSales.toFixed(2));
-        }
+    <script>
+        let sortOrderDescending = true;
+
+        document.addEventListener('DOMContentLoaded', loadOrders);
 
         function addOrder() {
             const order = {
-                date: document.getElementById("date").value,
-                customerId: document.getElementById("customerId").value,
-                customerName: document.getElementById("customerName").value,
-                orderNumber: document.getElementById("orderNumber").value,
-                saleAmount: parseFloat(document.getElementById("saleAmount").value) || 0,
-                notes: document.getElementById("orderNotes").value,
-                status: document.getElementById("orderStatus").value
+                id: document.getElementById('orderId').value,
+                customer: document.getElementById('customerName').value,
+                dateReceived: document.getElementById('dateReceived').value,
+                currentStage: document.getElementById('currentStage').value,
+                paymentStatus: document.getElementById('paymentStatus').value,
+                notes: document.getElementById('notes').value,
+                orderId: Date.now() // Unique identifier for each order
             };
+
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
             orders.push(order);
-            saveData();
-            renderOrders();
+            localStorage.setItem('orders', JSON.stringify(orders));
+
+            displayOrders();
+            clearForm();
         }
 
-        function renderOrders() {
-            const orderList = document.getElementById("orderList");
-            orderList.innerHTML = "";
-            orders.forEach((order, index) => {
-                orderList.innerHTML += `
-                    <tr>
-                        <td>${order.date}</td>
-                        <td>${order.customerId}</td>
-                        <td>${order.customerName}</td>
-                        <td>${order.orderNumber}</td>
-                        <td>$${order.saleAmount.toFixed(2)}</td>
-                        <td>${order.notes}</td>
-                        <td>${order.status}</td>
-                        <td>
-                            <button onclick="deleteOrder(${index})">Delete</button>
-                            <button onclick="completeOrder(${index})">Complete</button>
-                        </td>
-                    </tr>
+        function loadOrders() {
+            displayOrders();
+        }
+
+        function displayOrders() {
+            const tableBody = document.getElementById('ordersTable').getElementsByTagName('tbody')[0];
+            tableBody.innerHTML = '';
+
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders.sort((a, b) => sortOrderDescending ? new Date(b.dateReceived) - new Date(a.dateReceived) : new Date(a.dateReceived) - new Date(b.dateReceived));
+
+            orders.forEach(order => {
+                const newRow = tableBody.insertRow();
+                const stageClass = getStageClass(order.currentStage);
+                newRow.classList.add(stageClass);
+
+                newRow.innerHTML = `
+                    <td>${order.id}</td>
+                    <td>${order.customer}</td>
+                    <td>${order.dateReceived}</td>
+                    <td>${order.currentStage}</td>
+                    <td>${order.paymentStatus}</td>
+                    <td>${order.notes}</td>
+                    <td>
+                        <button class="action-btn edit-btn" onclick="editOrder(${order.orderId})">Edit</button>
+                        <button class="action-btn delete-btn" onclick="deleteOrder(${order.orderId})">Delete</button>
+                    </td>
                 `;
             });
         }
 
-        function deleteOrder(index) {
-            orders.splice(index, 1);
-            saveData();
-            renderOrders();
+        function toggleSortOrder() {
+            sortOrderDescending = !sortOrderDescending;
+            displayOrders();
         }
 
-        function completeOrder(index) {
-            totalSales += orders[index].saleAmount;
-            completedOrders.push(orders[index]);
-            orders.splice(index, 1);
-            saveData();
-            renderOrders();
-            renderCompletedOrders();
-            document.getElementById("totalSales").innerText = totalSales.toFixed(2);
+        function getStageClass(stage) {
+            return {
+                'Quotations': 'stage-Quotations',
+                'Transfers': 'stage-Transfers',
+                'Special Order Transfers': 'stage-SpecialOrderTransfers',
+                'In Production': 'stage-InProduction',
+                'Needs Certificates': 'stage-NeedsCertificates',
+                'Waiting for Payment': 'stage-WaitingForPayment',
+                'Ready for Delivery/Pick Up': 'stage-ReadyForDelivery'
+            }[stage] || '';
         }
 
-        function renderCompletedOrders() {
-            document.getElementById("totalSales").innerText = totalSales.toFixed(2);
+        function clearForm() {
+            document.getElementById('orderId').value = '';
+            document.getElementById('customerName').value = '';
+            document.getElementById('dateReceived').value = '';
+            document.getElementById('currentStage').value = 'Quotations';
+            document.getElementById('paymentStatus').value = 'Unpaid';
+            document.getElementById('notes').value = '';
         }
-        renderOrders();
-        renderCompletedOrders();
+
+        function editOrder(orderId) {
+            const orders = JSON.parse(localStorage.getItem('orders')) || [];
+            const order = orders.find(o => o.orderId === orderId);
+
+            document.getElementById('orderId').value = order.id;
+            document.getElementById('customerName').value = order.customer;
+            document.getElementById('dateReceived').value = order.dateReceived;
+            document.getElementById('currentStage').value = order.currentStage;
+            document.getElementById('paymentStatus').value = order.paymentStatus;
+            document.getElementById('notes').value = order.notes;
+
+            deleteOrder(orderId);
+        }
+
+        function deleteOrder(orderId) {
+            let orders = JSON.parse(localStorage.getItem('orders')) || [];
+            orders = orders.filter(order => order.orderId !== orderId);
+            localStorage.setItem('orders', JSON.stringify(orders));
+            displayOrders();
+        }
+
+        function searchOrders() {
+            const input = document.getElementById('searchBar').value.toLowerCase();
+            const rows = document.querySelectorAll('#ordersTable tbody tr');
+
+            rows.forEach(row => {
+                const orderId = row.cells[0].innerText.toLowerCase();
+                const customer = row.cells[1].innerText.toLowerCase();
+                row.style.display = orderId.includes(input) || customer.includes(input) ? '' : 'none';
+            });
+        }
     </script>
 </body>
 </html>
