@@ -158,7 +158,6 @@
         let orders = JSON.parse(localStorage.getItem("orders")) || [];
         let completedOrders = JSON.parse(localStorage.getItem("completedOrders")) || [];
         let totalSales = parseFloat(localStorage.getItem("totalSales")) || 0;
-        let editIndex = -1;
 
         function saveOrders() {
             localStorage.setItem("orders", JSON.stringify(orders));
@@ -178,7 +177,6 @@
                     <td>${order.notes || "—"}</td>
                     <td>${order.status}</td>
                     <td>
-                        <button class="button" onclick="editOrder(${index})">Edit</button>
                         <button class="button" onclick="completeOrder(${index})">Complete</button>
                         <button class="button" onclick="deleteOrder(${index})">Delete</button>
                     </td>
@@ -187,14 +185,21 @@
         }
 
         function addOrder() {
-            let order = { /* Order Object */ };
-            if (editIndex === -1) {
-                orders.push(order);
-            } else {
-                orders[editIndex] = order;
-                editIndex = -1;
-                document.getElementById("addOrderBtn").innerText = "Add Order";
+            let orderId = document.getElementById("orderId").value.trim();
+            let customerName = document.getElementById("customerName").value.trim();
+            let account = document.getElementById("customerAccount").value.trim();
+            let date = document.getElementById("dateReceived").value.trim();
+            let amount = parseFloat(document.getElementById("totalAmount").value) || 0;
+            let status = document.getElementById("orderStatus").value;
+
+            if (!orderId || !customerName || !account || !date || isNaN(amount)) {
+                alert("Please fill out all required fields correctly.");
+                return;
             }
+
+            let order = { id: orderId, customer: customerName, account, date, amount, notes: document.getElementById("orderNotes").value, status };
+
+            orders.push(order);
             saveOrders();
             displayOrders();
         }
@@ -207,22 +212,16 @@
             localStorage.setItem("totalSales", totalSales.toFixed(2));
             saveOrders();
             displayOrders();
-            displayCompletedOrders();
         }
 
         function deleteOrder(index) {
-            if (confirm("Are you sure you want to delete this order?")) {
-                orders.splice(index, 1);
-                saveOrders();
-                displayOrders();
-            }
+            orders.splice(index, 1);
+            saveOrders();
+            displayOrders();
         }
-
-        function displayCompletedOrders() { /* Display Completed Orders */ }
 
         function toggleDarkMode() {
             document.body.classList.toggle("dark-mode");
-            localStorage.setItem("darkMode", document.body.classList.contains("dark-mode"));
         }
 
         document.addEventListener("DOMContentLoaded", displayOrders);
@@ -230,4 +229,3 @@
 
 </body>
 </html>
-
