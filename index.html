@@ -1,165 +1,287 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Order Tracker</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 20px; padding: 20px; }
-        h2 { color: #333; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
-        label, input, select, button, textarea { display: block; width: 100%; margin-bottom: 10px; }
-        .table-container { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #4CAF50; color: white; }
-        .btn { cursor: pointer; padding: 5px; border: none; border-radius: 5px; }
-        .edit { background-color: #f0ad4e; color: white; }
-        .delete { background-color: #d9534f; color: white; }
-        .complete { background-color: #5bc0de; color: white; }
-        #editMessage { color: red; font-weight: bold; display: none; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Order Tracker</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 20px;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+    label, input, select, button, textarea {
+      display: block;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+    }
+    th {
+      background-color: #4CAF50;
+      color: white;
+    }
+    .btn {
+      cursor: pointer;
+      padding: 5px;
+      border: none;
+      border-radius: 5px;
+    }
+    .edit {
+      background-color: #f0ad4e;
+      color: white;
+    }
+    .delete {
+      background-color: #d9534f;
+      color: white;
+    }
+    .complete {
+      background-color: #5bc0de;
+      color: white;
+    }
+    #editMessage {
+      color: red;
+      font-weight: bold;
+      display: none;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Order Tracker</h2>
-        <p id="editMessage"></p>
-        <form id="orderForm">
-            <label>Date:</label>
-            <input type="date" id="date" required>
-            <label>Customer ID:</label>
-            <input type="text" id="customerId" required>
-            <label>Customer Name:</label>
-            <input type="text" id="customerName" required>
-            <label>Order Number:</label>
-            <input type="text" id="orderNumber" required>
-            <label>Sale Amount:</label>
-            <input type="number" id="saleAmount" step="0.01" required>
-            <label>Order Status:</label>
-            <select id="orderStatus">
-                <option>Quotation</option>
-                <option>Waiting for Pricing</option>
-                <option>Transfer</option>
-                <option>In Production</option>
-                <option>Need Certificates</option>
-                <option>Need PO</option>
-                <option>Need Payment</option>
-                <option>Ready for Pick Up/Delivery</option>
-            </select>
-            <label>Notes:</label>
-            <textarea id="notes"></textarea>
-            <button type="submit" id="submitBtn">Add Order</button>
-        </form>
-        
-        <h2>Active Orders</h2>
-        <div class="table-container">
-            <table id="orderTable">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Customer ID</th>
-                        <th>Customer Name</th>
-                        <th>Order Number</th>
-                        <th>Sale Amount</th>
-                        <th>Status</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
+  <div class="container">
+    <h2>Order Tracker</h2>
+    <p id="editMessage"></p>
+    <form id="orderForm">
+      <label>Date:</label>
+      <input type="date" id="date" required />
+      <label>Customer ID:</label>
+      <input type="text" id="customerId" required />
+      <label>Customer Name:</label>
+      <input type="text" id="customerName" required />
+      <label>Order Number:</label>
+      <input type="text" id="orderNumber" required />
+      <label>Sale Amount:</label>
+      <input type="number" id="saleAmount" step="0.01" required />
+      <label>Order Status:</label>
+      <select id="orderStatus">
+        <option>Quotation</option>
+        <option>Waiting for Pricing</option>
+        <option>Transfer</option>
+        <option>In Production</option>
+        <option>Need Certificates</option>
+        <option>Need PO</option>
+        <option>Need Payment</option>
+        <option>Ready for Pick Up/Delivery</option>
+      </select>
+      <label>Notes:</label>
+      <textarea id="notes"></textarea>
+      <button type="submit" id="submitBtn">Add Order</button>
+    </form>
 
-        <h2>Completed Orders</h2>
-        <div class="table-container">
-            <table id="completedOrders">
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Customer ID</th>
-                        <th>Customer Name</th>
-                        <th>Order Number</th>
-                        <th>Sale Amount</th>
-                        <th>Notes</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-        </div>
-
-        <h3>Total Sales: $<span id="totalSales">0.00</span></h3>
+    <h2>Active Orders</h2>
+    <div class="table-container">
+      <table id="orderTable">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Customer ID</th>
+            <th>Customer Name</th>
+            <th>Order Number</th>
+            <th>Sale Amount</th>
+            <th>Status</th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
     </div>
-    
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const orderForm = document.getElementById("orderForm");
-            const orderTable = document.getElementById("orderTable").querySelector("tbody");
-            const completedOrders = document.getElementById("completedOrders").querySelector("tbody");
-            const totalSales = document.getElementById("totalSales");
-            const submitBtn = document.getElementById("submitBtn");
-            const editMessage = document.getElementById("editMessage");
 
-            let orders = JSON.parse(localStorage.getItem("orders")) || [];
-            let completed = JSON.parse(localStorage.getItem("completed")) || [];
-            let editIndex = null;
+    <h2>Completed Orders</h2>
+    <div class="table-container">
+      <table id="completedOrders">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Customer ID</th>
+            <th>Customer Name</th>
+            <th>Order Number</th>
+            <th>Sale Amount</th>
+            <th>Notes</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
 
-            function saveData() {
-                localStorage.setItem("orders", JSON.stringify(orders));
-                localStorage.setItem("completed", JSON.stringify(completed));
-            }
+    <h3>Total Sales: $<span id="totalSales">0.00</span></h3>
+  </div>
 
-            function updateTotalSales() {
-                let salesTotal = completed.reduce((sum, order) => sum + (parseFloat(order.saleAmount) || 0), 0);
-                totalSales.textContent = salesTotal.toFixed(2);
-            }
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      const orderForm = document.getElementById("orderForm");
+      const orderTableBody = document.getElementById("orderTable").querySelector("tbody");
+      const completedOrdersBody = document.getElementById("completedOrders").querySelector("tbody");
+      const totalSales = document.getElementById("totalSales");
+      const submitBtn = document.getElementById("submitBtn");
+      const editMessage = document.getElementById("editMessage");
 
-            function renderTables() {
-                orderTable.innerHTML = "";
-                completedOrders.innerHTML = "";
+      let orders = JSON.parse(localStorage.getItem("orders")) || [];
+      let completed = JSON.parse(localStorage.getItem("completed")) || [];
+      let editIndex = null;
 
-                orders.forEach((order, index) => {
-                    let row = document.createElement("tr");
-                    row.innerHTML = `
-                        <td>${order.date}</td>
-                        <td>${order.customerId}</td>
-                        <td>${order.customerName}</td>
-                        <td>${order.orderNumber}</td>
-                        <td>$${parseFloat(order.saleAmount).toFixed(2)}</td>
-                        <td>${order.orderStatus}</td>
-                        <td>${order.notes}</td>
-                        <td>
-                            <button class="btn delete" data-index="${index}">Delete</button>
-                            <button class="btn complete" data-index="${index}">Complete</button>
-                        </td>
-                    `;
-                    orderTable.appendChild(row);
-                });
+      function saveData() {
+        localStorage.setItem("orders", JSON.stringify(orders));
+        localStorage.setItem("completed", JSON.stringify(completed));
+      }
 
-                updateTotalSales();
-            }
+      function updateTotalSales() {
+        const salesTotal = completed.reduce((sum, order) => sum + (parseFloat(order.saleAmount) || 0), 0);
+        totalSales.textContent = salesTotal.toFixed(2);
+      }
 
-            orderForm.addEventListener("submit", function (e) {
-                e.preventDefault();
+      function renderTables() {
+        orderTableBody.innerHTML = "";
+        completedOrdersBody.innerHTML = "";
 
-                const newOrder = {
-                    date: document.getElementById("date").value,
-                    customerId: document.getElementById("customerId").value,
-                    customerName: document.getElementById("customerName").value,
-                    orderNumber: document.getElementById("orderNumber").value,
-                    saleAmount: document.getElementById("saleAmount").value,
-                    orderStatus: document.getElementById("orderStatus").value,
-                    notes: document.getElementById("notes").value,
-                };
-
-                orders.push(newOrder);
-                saveData();
-                renderTables();
-                orderForm.reset();
-            });
-
-            renderTables();
+        orders.forEach((order, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${order.date}</td>
+            <td>${order.customerId}</td>
+            <td>${order.customerName}</td>
+            <td>${order.orderNumber}</td>
+            <td>$${parseFloat(order.saleAmount).toFixed(2)}</td>
+            <td>${order.orderStatus}</td>
+            <td>${order.notes}</td>
+            <td>
+              <button class="btn edit" data-index="${index}">Edit</button>
+              <button class="btn delete" data-index="${index}">Delete</button>
+              <button class="btn complete" data-index="${index}">Complete</button>
+            </td>
+          `;
+          orderTableBody.appendChild(row);
         });
-    </script>
+
+        completed.forEach((order, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${order.date}</td>
+            <td>${order.customerId}</td>
+            <td>${order.customerName}</td>
+            <td>${order.orderNumber}</td>
+            <td>$${parseFloat(order.saleAmount).toFixed(2)}</td>
+            <td>${order.notes}</td>
+            <td>
+              <button class="btn delete" data-index="${index}" data-type="completed">Delete</button>
+            </td>
+          `;
+          completedOrdersBody.appendChild(row);
+        });
+
+        updateTotalSales();
+        attachEventListeners();
+      }
+
+      function attachEventListeners() {
+        // Attach event listeners for Edit buttons
+        document.querySelectorAll(".edit").forEach(button => {
+          button.addEventListener("click", function () {
+            editIndex = this.dataset.index;
+            const order = orders[editIndex];
+
+            document.getElementById("date").value = order.date;
+            document.getElementById("customerId").value = order.customerId;
+            document.getElementById("customerName").value = order.customerName;
+            document.getElementById("orderNumber").value = order.orderNumber;
+            document.getElementById("saleAmount").value = order.saleAmount;
+            document.getElementById("orderStatus").value = order.orderStatus;
+            document.getElementById("notes").value = order.notes;
+
+            submitBtn.textContent = "Update Order";
+            editMessage.textContent = "Editing an existing order...";
+            editMessage.style.display = "block";
+          });
+        });
+
+        // Attach event listeners for Delete buttons
+        document.querySelectorAll(".delete").forEach(button => {
+          button.addEventListener("click", function () {
+            const index = this.dataset.index;
+            const type = this.dataset.type;
+            if (type === "completed") {
+              completed.splice(index, 1);
+            } else {
+              orders.splice(index, 1);
+            }
+            saveData();
+            renderTables();
+          });
+        });
+
+        // Attach event listeners for Complete buttons
+        document.querySelectorAll(".complete").forEach(button => {
+          button.addEventListener("click", function () {
+            const index = this.dataset.index;
+            const completedOrder = orders.splice(index, 1)[0];
+            completed.push(completedOrder);
+            saveData();
+            renderTables();
+          });
+        });
+      }
+
+      orderForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        const newOrder = {
+          date: document.getElementById("date").value,
+          customerId: document.getElementById("customerId").value,
+          customerName: document.getElementById("customerName").value,
+          orderNumber: document.getElementById("orderNumber").value,
+          saleAmount: document.getElementById("saleAmount").value,
+          orderStatus: document.getElementById("orderStatus").value,
+          notes: document.getElementById("notes").value,
+        };
+
+        if (editIndex === null) {
+          orders.push(newOrder);
+        } else {
+          orders[editIndex] = newOrder;
+          editIndex = null;
+          submitBtn.textContent = "Add Order";
+          editMessage.style.display = "none";
+        }
+
+        saveData();
+        renderTables();
+        orderForm.reset();
+      });
+
+      renderTables();
+    });
+  </script>
 </body>
 </html>
