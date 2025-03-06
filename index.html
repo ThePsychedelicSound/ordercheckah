@@ -4,36 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Tracker</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: Arial, sans-serif;
             background-color: #f4f4f4;
+            margin: 20px;
             padding: 20px;
+        }
+        h2 {
+            color: #333;
         }
         .container {
             max-width: 800px;
             margin: auto;
             background: white;
             padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
-        h2 {
-            text-align: center;
-            color: #333;
-        }
-        input, select, button {
+        label, input, select, button, textarea {
+            display: block;
             width: 100%;
-            padding: 10px;
-            margin: 5px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            background: #28a745;
-            color: white;
-            cursor: pointer;
+            margin-bottom: 10px;
         }
         table {
             width: 100%;
@@ -41,30 +33,40 @@
             margin-top: 20px;
         }
         th, td {
-            padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
+            padding: 8px;
             text-align: center;
         }
-        .btn-edit { background: #ffc107; }
-        .btn-delete { background: #dc3545; }
-        .btn-complete { background: #007bff; }
-        .completed-section {
-            margin-top: 30px;
-            padding: 15px;
-            background: #d4edda;
-            border-radius: 10px;
+        th {
+            background-color: #4CAF50;
+            color: white;
         }
+        .btn {
+            cursor: pointer;
+            padding: 5px;
+            border: none;
+            border-radius: 5px;
+        }
+        .edit { background-color: #f0ad4e; color: white; }
+        .delete { background-color: #d9534f; color: white; }
+        .complete { background-color: #5bc0de; color: white; }
     </style>
 </head>
 <body>
     <div class="container">
         <h2>Order Tracker</h2>
         <form id="orderForm">
+            <label>Date:</label>
             <input type="date" id="date" required>
-            <input type="text" id="customerId" placeholder="Customer ID" required>
-            <input type="text" id="customerName" placeholder="Customer Name" required>
-            <input type="text" id="orderNumber" placeholder="Order Number" required>
-            <input type="number" id="saleAmount" placeholder="Sale Amount ($)" required>
+            <label>Customer ID:</label>
+            <input type="text" id="customerId" required>
+            <label>Customer Name:</label>
+            <input type="text" id="customerName" required>
+            <label>Order Number:</label>
+            <input type="text" id="orderNumber" required>
+            <label>Sale Amount:</label>
+            <input type="number" id="saleAmount" step="0.01" required>
+            <label>Order Status:</label>
             <select id="orderStatus">
                 <option>Quotation</option>
                 <option>Waiting for Pricing</option>
@@ -75,10 +77,13 @@
                 <option>Need Payment</option>
                 <option>Ready for Pick Up/Delivery</option>
             </select>
+            <label>Notes:</label>
+            <textarea id="notes"></textarea>
             <button type="submit">Add Order</button>
         </form>
-
-        <table>
+        
+        <h2>Active Orders</h2>
+        <table id="orderTable">
             <thead>
                 <tr>
                     <th>Date</th>
@@ -87,110 +92,111 @@
                     <th>Order Number</th>
                     <th>Sale Amount</th>
                     <th>Status</th>
+                    <th>Notes</th>
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody id="orderList"></tbody>
+            <tbody></tbody>
         </table>
-
-        <div class="completed-section">
-            <h3>Completed Orders</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Date</th>
-                        <th>Customer ID</th>
-                        <th>Customer Name</th>
-                        <th>Order Number</th>
-                        <th>Sale Amount</th>
-                    </tr>
-                </thead>
-                <tbody id="completedOrders"></tbody>
-            </table>
-            <h3>Total Sales: $<span id="totalSales">0.00</span></h3>
-        </div>
+        
+        <h2>Completed Orders</h2>
+        <table id="completedOrders">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Customer ID</th>
+                    <th>Customer Name</th>
+                    <th>Order Number</th>
+                    <th>Sale Amount</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <h3>Total Sales: $<span id="totalSales">0</span></h3>
     </div>
-
+    
     <script>
-        let orders = JSON.parse(localStorage.getItem("orders")) || [];
-        let completedOrders = JSON.parse(localStorage.getItem("completedOrders")) || [];
-        let totalSales = parseFloat(localStorage.getItem("totalSales")) || 0;
-
-        document.getElementById("orderForm").addEventListener("submit", function(event) {
-            event.preventDefault();
-            let order = {
-                date: document.getElementById("date").value,
-                customerId: document.getElementById("customerId").value,
-                customerName: document.getElementById("customerName").value,
-                orderNumber: document.getElementById("orderNumber").value,
-                saleAmount: parseFloat(document.getElementById("saleAmount").value),
-                status: document.getElementById("orderStatus").value
+        document.addEventListener("DOMContentLoaded", function() {
+            const orderForm = document.getElementById("orderForm");
+            const orderTable = document.getElementById("orderTable").querySelector("tbody");
+            const completedOrders = document.getElementById("completedOrders").querySelector("tbody");
+            const totalSales = document.getElementById("totalSales");
+            let orders = JSON.parse(localStorage.getItem("orders")) || [];
+            let completed = JSON.parse(localStorage.getItem("completed")) || [];
+            
+            function saveData() {
+                localStorage.setItem("orders", JSON.stringify(orders));
+                localStorage.setItem("completed", JSON.stringify(completed));
+            }
+            
+            function renderTables() {
+                orderTable.innerHTML = "";
+                completedOrders.innerHTML = "";
+                let salesTotal = 0;
+                
+                orders.forEach((order, index) => {
+                    let row = `<tr>
+                        <td>${order.date}</td>
+                        <td>${order.customerId}</td>
+                        <td>${order.customerName}</td>
+                        <td>${order.orderNumber}</td>
+                        <td>$${order.saleAmount}</td>
+                        <td>${order.orderStatus}</td>
+                        <td>${order.notes}</td>
+                        <td>
+                            <button class="btn edit" onclick="editOrder(${index})">Edit</button>
+                            <button class="btn delete" onclick="deleteOrder(${index})">Delete</button>
+                            <button class="btn complete" onclick="completeOrder(${index})">Complete</button>
+                        </td>
+                    </tr>`;
+                    orderTable.innerHTML += row;
+                });
+                
+                completed.forEach(order => {
+                    salesTotal += parseFloat(order.saleAmount);
+                    let row = `<tr>
+                        <td>${order.date}</td>
+                        <td>${order.customerId}</td>
+                        <td>${order.customerName}</td>
+                        <td>${order.orderNumber}</td>
+                        <td>$${order.saleAmount}</td>
+                        <td>${order.notes}</td>
+                    </tr>`;
+                    completedOrders.innerHTML += row;
+                });
+                totalSales.textContent = salesTotal.toFixed(2);
+            }
+            
+            window.deleteOrder = function(index) {
+                orders.splice(index, 1);
+                saveData();
+                renderTables();
             };
-            orders.push(order);
-            saveOrders();
-            updateOrderTable();
-            this.reset();
+            
+            window.completeOrder = function(index) {
+                completed.push(orders[index]);
+                orders.splice(index, 1);
+                saveData();
+                renderTables();
+            };
+            
+            window.editOrder = function(index) {
+                let order = orders[index];
+                document.getElementById("date").value = order.date;
+                document.getElementById("customerId").value = order.customerId;
+                document.getElementById("customerName").value = order.customerName;
+                document.getElementById("orderNumber").value = order.orderNumber;
+                document.getElementById("saleAmount").value = order.saleAmount;
+                document.getElementById("orderStatus").value = order.orderStatus;
+                document.getElementById("notes").value = order.notes;
+                orders.splice(index, 1);
+                saveData();
+                renderTables();
+            };
+            
+            renderTables();
         });
-
-        function saveOrders() {
-            localStorage.setItem("orders", JSON.stringify(orders));
-            localStorage.setItem("completedOrders", JSON.stringify(completedOrders));
-            localStorage.setItem("totalSales", totalSales);
-        }
-
-        function updateOrderTable() {
-            let orderList = document.getElementById("orderList");
-            orderList.innerHTML = "";
-            orders.forEach((order, index) => {
-                let row = `<tr>
-                    <td>${order.date}</td>
-                    <td>${order.customerId}</td>
-                    <td>${order.customerName}</td>
-                    <td>${order.orderNumber}</td>
-                    <td>$${order.saleAmount.toFixed(2)}</td>
-                    <td>${order.status}</td>
-                    <td>
-                        <button class='btn-delete' onclick='deleteOrder(${index})'>Delete</button>
-                        <button class='btn-complete' onclick='completeOrder(${index})'>Complete</button>
-                    </td>
-                </tr>`;
-                orderList.innerHTML += row;
-            });
-        }
-
-        function deleteOrder(index) {
-            orders.splice(index, 1);
-            saveOrders();
-            updateOrderTable();
-        }
-
-        function completeOrder(index) {
-            completedOrders.push(orders[index]);
-            totalSales += orders[index].saleAmount;
-            orders.splice(index, 1);
-            saveOrders();
-            updateOrderTable();
-            updateCompletedOrders();
-        }
-
-        function updateCompletedOrders() {
-            let completedList = document.getElementById("completedOrders");
-            completedList.innerHTML = "";
-            completedOrders.forEach(order => {
-                let row = `<tr>
-                    <td>${order.date}</td>
-                    <td>${order.customerId}</td>
-                    <td>${order.customerName}</td>
-                    <td>${order.orderNumber}</td>
-                    <td>$${order.saleAmount.toFixed(2)}</td>
-                </tr>`;
-                completedList.innerHTML += row;
-            });
-            document.getElementById("totalSales").textContent = totalSales.toFixed(2);
-        }
-
-        updateOrderTable();
-        updateCompletedOrders();
     </script>
 </body>
 </html>
