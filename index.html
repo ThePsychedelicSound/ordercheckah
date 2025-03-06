@@ -1,64 +1,23 @@
-﻿html
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Tracker</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 20px;
-            padding: 20px;
-        }
-        h2 {
-            color: #333;
-        }
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        label, input, select, button, textarea {
-            display: block;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        .table-container {
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
-            text-align: center;
-        }
-        th {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .btn {
-            cursor: pointer;
-            padding: 5px;
-            border: none;
-            border-radius: 5px;
-        }
+        body { font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 20px; padding: 20px; }
+        h2 { color: #333; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        label, input, select, button, textarea { display: block; width: 100%; margin-bottom: 10px; }
+        .table-container { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        .btn { cursor: pointer; padding: 5px; border: none; border-radius: 5px; }
         .edit { background-color: #f0ad4e; color: white; }
         .delete { background-color: #d9534f; color: white; }
         .complete { background-color: #5bc0de; color: white; }
-        #editMessage {
-            color: red;
-            font-weight: bold;
-            display: none;
-        }
+        #editMessage { color: red; font-weight: bold; display: none; }
     </style>
 </head>
 <body>
@@ -122,6 +81,7 @@
                         <th>Order Number</th>
                         <th>Sale Amount</th>
                         <th>Notes</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody></tbody>
@@ -158,82 +118,39 @@
                 orderTable.innerHTML = "";
                 completedOrders.innerHTML = "";
 
-                orders.sort((a, b) => new Date(a.date) - new Date(b.date));
-
                 orders.forEach((order, index) => {
-                    let row = `<tr>
-                        <td>${order.date}</td>
-                        <td>${order.customerId}</td>
-                        <td>${order.customerName}</td>
-                        <td>${order.orderNumber}</td>
-                        <td>$${isNaN(parseFloat(order.saleAmount)) ? "0.00" : parseFloat(order.saleAmount).toFixed(2)}</td>
-                        <td>${order.orderStatus}</td>
-                        <td>${order.notes}</td>
-                        <td>
-                            <button class="btn edit" data-index="${index}">Edit</button>
-                            <button class="btn delete" data-index="${index}">Delete</button>
-                            <button class="btn complete" data-index="${index}">Complete</button>
-                        </td>
-                    </tr>`;
-                    orderTable.insertAdjacentHTML("beforeend", row);
+                    orderTable.innerHTML += `
+                        <tr>
+                            <td>${order.date}</td>
+                            <td>${order.customerId}</td>
+                            <td>${order.customerName}</td>
+                            <td>${order.orderNumber}</td>
+                            <td>$${parseFloat(order.saleAmount).toFixed(2)}</td>
+                            <td>${order.orderStatus}</td>
+                            <td>${order.notes}</td>
+                            <td>
+                                <button class="btn edit" data-index="${index}">Edit</button>
+                                <button class="btn delete" data-index="${index}">Delete</button>
+                                <button class="btn complete" data-index="${index}">Complete</button>
+                            </td>
+                        </tr>`;
+                });
+
+                completed.forEach((order, index) => {
+                    completedOrders.innerHTML += `
+                        <tr>
+                            <td>${order.date}</td>
+                            <td>${order.customerId}</td>
+                            <td>${order.customerName}</td>
+                            <td>${order.orderNumber}</td>
+                            <td>$${parseFloat(order.saleAmount).toFixed(2)}</td>
+                            <td>${order.notes}</td>
+                            <td><button class="btn delete" data-index="${index}" data-type="completed">Delete</button></td>
+                        </tr>`;
                 });
 
                 updateTotalSales();
             }
-
-            orderForm.addEventListener("submit", function(event) {
-                event.preventDefault();
-
-                let newOrder = {
-                    date: document.getElementById("date").value,
-                    customerId: document.getElementById("customerId").value,
-                    customerName: document.getElementById("customerName").value,
-                    orderNumber: document.getElementById("orderNumber").value,
-                    saleAmount: parseFloat(document.getElementById("saleAmount").value) || 0,
-                    orderStatus: document.getElementById("orderStatus").value,
-                    notes: document.getElementById("notes").value
-                };
-
-                if (editIndex !== null) {
-                    orders[editIndex] = newOrder;
-                    editIndex = null;
-                    submitBtn.textContent = "Add Order";
-                    editMessage.style.display = "none";
-                } else {
-                    orders.push(newOrder);
-                }
-
-                saveData();
-                renderTables();
-                orderForm.reset();
-            });
-
-            document.addEventListener("click", function(event) {
-                let index = event.target.getAttribute("data-index");
-                if (event.target.classList.contains("edit")) {
-                    let order = orders[index];
-                    document.getElementById("date").value = order.date;
-                    document.getElementById("customerId").value = order.customerId;
-                    document.getElementById("customerName").value = order.customerName;
-                    document.getElementById("orderNumber").value = order.orderNumber;
-                    document.getElementById("saleAmount").value = order.saleAmount;
-                    document.getElementById("orderStatus").value = order.orderStatus;
-                    document.getElementById("notes").value = order.notes;
-                    editIndex = index;
-                    submitBtn.textContent = "Update Order";
-                    editMessage.textContent = "Editing Order: " + order.orderNumber;
-                    editMessage.style.display = "block";
-                } else if (event.target.classList.contains("delete")) {
-                    orders.splice(index, 1);
-                    saveData();
-                    renderTables();
-                } else if (event.target.classList.contains("complete")) {
-                    completed.push(orders[index]);
-                    orders.splice(index, 1);
-                    saveData();
-                    renderTables();
-                }
-            });
 
             renderTables();
         });
