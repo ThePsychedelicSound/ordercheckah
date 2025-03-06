@@ -53,13 +53,13 @@
 
         /* ✅ Color-coding rows based on order status */
         .Quotation { background-color: #f8f9fa; }
-        .Waiting-for-Pricing { background-color: #ffeb3b; } /* Yellow */
-        .Transfer { background-color: #ff9800; } /* Orange */
-        .In-Production { background-color: #4CAF50; color: white; } /* Green */
-        .Need-Certificates { background-color: #673AB7; color: white; } /* Purple */
-        .Need-PO { background-color: #2196F3; color: white; } /* Blue */
-        .Need-Payment { background-color: #E91E63; color: white; } /* Pink */
-        .Ready-for-Pick-Up-Delivery { background-color: #8BC34A; color: white; } /* Light Green */
+        .Waiting-for-Pricing { background-color: #ffeb3b; }
+        .Transfer { background-color: #ff9800; }
+        .In-Production { background-color: #4CAF50; color: white; }
+        .Need-Certificates { background-color: #673AB7; color: white; }
+        .Need-PO { background-color: #2196F3; color: white; }
+        .Need-Payment { background-color: #E91E63; color: white; }
+        .Ready-for-Pick-Up-Delivery { background-color: #8BC34A; color: white; }
     </style>
 </head>
 <body>
@@ -149,7 +149,7 @@
                 orders.sort((a, b) => new Date(a.date) - new Date(b.date));
 
                 orders.forEach((order, index) => {
-                    let statusClass = order.orderStatus.replace(/ /g, "-"); // ✅ Fix spaces for class
+                    let statusClass = order.orderStatus.replace(/ /g, "-");
                     let row = `<tr class="${statusClass}">
                         <td>${order.date}</td>
                         <td>${order.customerId}</td>
@@ -182,6 +182,31 @@
                 totalSales.textContent = salesTotal.toFixed(2);
             }
 
+            orderForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+
+                let newOrder = {
+                    date: document.getElementById("date").value,
+                    customerId: document.getElementById("customerId").value,
+                    customerName: document.getElementById("customerName").value,
+                    orderNumber: document.getElementById("orderNumber").value,
+                    saleAmount: document.getElementById("saleAmount").value,
+                    orderStatus: document.getElementById("orderStatus").value,
+                    notes: document.getElementById("notes").value
+                };
+
+                if (editIndex !== null) {
+                    orders[editIndex] = newOrder;
+                    editIndex = null;
+                } else {
+                    orders.push(newOrder);
+                }
+
+                saveData();
+                renderTables();
+                orderForm.reset();
+            });
+
             window.editOrder = function(index) {
                 let order = orders[index];
                 document.getElementById("date").value = order.date;
@@ -193,16 +218,6 @@
                 document.getElementById("notes").value = order.notes;
                 editIndex = index;
             };
-
-            orderForm.addEventListener("submit", function(event) {
-                event.preventDefault();
-                if (editIndex !== null) orders.splice(editIndex, 1);
-                orders.push(Object.fromEntries(new FormData(orderForm)));
-                saveData();
-                renderTables();
-                orderForm.reset();
-                editIndex = null;
-            });
 
             renderTables();
         });
