@@ -149,8 +149,83 @@
                         </tr>`;
                 });
 
+                attachEventListeners();
                 updateTotalSales();
             }
+
+            function attachEventListeners() {
+                document.querySelectorAll(".edit").forEach(button => {
+                    button.addEventListener("click", function () {
+                        editIndex = this.dataset.index;
+                        let order = orders[editIndex];
+
+                        document.getElementById("date").value = order.date;
+                        document.getElementById("customerId").value = order.customerId;
+                        document.getElementById("customerName").value = order.customerName;
+                        document.getElementById("orderNumber").value = order.orderNumber;
+                        document.getElementById("saleAmount").value = order.saleAmount;
+                        document.getElementById("orderStatus").value = order.orderStatus;
+                        document.getElementById("notes").value = order.notes;
+
+                        submitBtn.textContent = "Update Order";
+                        editMessage.textContent = "Editing an existing order...";
+                        editMessage.style.display = "block";
+                    });
+                });
+
+                document.querySelectorAll(".delete").forEach(button => {
+                    button.addEventListener("click", function () {
+                        let index = this.dataset.index;
+                        let type = this.dataset.type;
+
+                        if (type === "completed") {
+                            completed.splice(index, 1);
+                        } else {
+                            orders.splice(index, 1);
+                        }
+
+                        saveData();
+                        renderTables();
+                    });
+                });
+
+                document.querySelectorAll(".complete").forEach(button => {
+                    button.addEventListener("click", function () {
+                        let index = this.dataset.index;
+                        let completedOrder = orders.splice(index, 1)[0];
+
+                        completed.push(completedOrder);
+                        saveData();
+                        renderTables();
+                    });
+                });
+            }
+
+            orderForm.addEventListener("submit", function (e) {
+                e.preventDefault();
+                const newOrder = {
+                    date: document.getElementById("date").value,
+                    customerId: document.getElementById("customerId").value,
+                    customerName: document.getElementById("customerName").value,
+                    orderNumber: document.getElementById("orderNumber").value,
+                    saleAmount: document.getElementById("saleAmount").value,
+                    orderStatus: document.getElementById("orderStatus").value,
+                    notes: document.getElementById("notes").value,
+                };
+
+                if (editIndex === null) {
+                    orders.push(newOrder);
+                } else {
+                    orders[editIndex] = newOrder;
+                    editIndex = null;
+                    submitBtn.textContent = "Add Order";
+                    editMessage.style.display = "none";
+                }
+
+                saveData();
+                renderTables();
+                orderForm.reset();
+            });
 
             renderTables();
         });
