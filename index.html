@@ -119,90 +119,29 @@
                 completedOrders.innerHTML = "";
 
                 orders.forEach((order, index) => {
-                    orderTable.innerHTML += `
-                        <tr>
-                            <td>${order.date}</td>
-                            <td>${order.customerId}</td>
-                            <td>${order.customerName}</td>
-                            <td>${order.orderNumber}</td>
-                            <td>$${parseFloat(order.saleAmount).toFixed(2)}</td>
-                            <td>${order.orderStatus}</td>
-                            <td>${order.notes}</td>
-                            <td>
-                                <button class="btn edit" data-index="${index}">Edit</button>
-                                <button class="btn delete" data-index="${index}">Delete</button>
-                                <button class="btn complete" data-index="${index}">Complete</button>
-                            </td>
-                        </tr>`;
+                    let row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${order.date}</td>
+                        <td>${order.customerId}</td>
+                        <td>${order.customerName}</td>
+                        <td>${order.orderNumber}</td>
+                        <td>$${parseFloat(order.saleAmount).toFixed(2)}</td>
+                        <td>${order.orderStatus}</td>
+                        <td>${order.notes}</td>
+                        <td>
+                            <button class="btn delete" data-index="${index}">Delete</button>
+                            <button class="btn complete" data-index="${index}">Complete</button>
+                        </td>
+                    `;
+                    orderTable.appendChild(row);
                 });
 
-                completed.forEach((order, index) => {
-                    completedOrders.innerHTML += `
-                        <tr>
-                            <td>${order.date}</td>
-                            <td>${order.customerId}</td>
-                            <td>${order.customerName}</td>
-                            <td>${order.orderNumber}</td>
-                            <td>$${parseFloat(order.saleAmount).toFixed(2)}</td>
-                            <td>${order.notes}</td>
-                            <td><button class="btn delete" data-index="${index}" data-type="completed">Delete</button></td>
-                        </tr>`;
-                });
-
-                attachEventListeners();
                 updateTotalSales();
-            }
-
-            function attachEventListeners() {
-                document.querySelectorAll(".edit").forEach(button => {
-                    button.addEventListener("click", function () {
-                        editIndex = this.dataset.index;
-                        let order = orders[editIndex];
-
-                        document.getElementById("date").value = order.date;
-                        document.getElementById("customerId").value = order.customerId;
-                        document.getElementById("customerName").value = order.customerName;
-                        document.getElementById("orderNumber").value = order.orderNumber;
-                        document.getElementById("saleAmount").value = order.saleAmount;
-                        document.getElementById("orderStatus").value = order.orderStatus;
-                        document.getElementById("notes").value = order.notes;
-
-                        submitBtn.textContent = "Update Order";
-                        editMessage.textContent = "Editing an existing order...";
-                        editMessage.style.display = "block";
-                    });
-                });
-
-                document.querySelectorAll(".delete").forEach(button => {
-                    button.addEventListener("click", function () {
-                        let index = this.dataset.index;
-                        let type = this.dataset.type;
-
-                        if (type === "completed") {
-                            completed.splice(index, 1);
-                        } else {
-                            orders.splice(index, 1);
-                        }
-
-                        saveData();
-                        renderTables();
-                    });
-                });
-
-                document.querySelectorAll(".complete").forEach(button => {
-                    button.addEventListener("click", function () {
-                        let index = this.dataset.index;
-                        let completedOrder = orders.splice(index, 1)[0];
-
-                        completed.push(completedOrder);
-                        saveData();
-                        renderTables();
-                    });
-                });
             }
 
             orderForm.addEventListener("submit", function (e) {
                 e.preventDefault();
+
                 const newOrder = {
                     date: document.getElementById("date").value,
                     customerId: document.getElementById("customerId").value,
@@ -213,15 +152,7 @@
                     notes: document.getElementById("notes").value,
                 };
 
-                if (editIndex === null) {
-                    orders.push(newOrder);
-                } else {
-                    orders[editIndex] = newOrder;
-                    editIndex = null;
-                    submitBtn.textContent = "Add Order";
-                    editMessage.style.display = "none";
-                }
-
+                orders.push(newOrder);
                 saveData();
                 renderTables();
                 orderForm.reset();
