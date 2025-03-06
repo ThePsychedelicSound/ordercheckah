@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -50,6 +50,16 @@
         .edit { background-color: #f0ad4e; color: white; }
         .delete { background-color: #d9534f; color: white; }
         .complete { background-color: #5bc0de; color: white; }
+        
+        /* ✅ Color-coding rows based on order status */
+        .Quotation { background-color: #f8f9fa; }
+        .Waiting { background-color: #ffeb3b; } /* Yellow */
+        .Transfer { background-color: #ff9800; } /* Orange */
+        .Production { background-color: #4CAF50; color: white; } /* Green */
+        .Certificates { background-color: #673AB7; color: white; } /* Purple */
+        .PO { background-color: #2196F3; color: white; } /* Blue */
+        .Payment { background-color: #E91E63; color: white; } /* Pink */
+        .Delivery { background-color: #8BC34A; color: white; } /* Light Green */
     </style>
 </head>
 <body>
@@ -135,8 +145,12 @@
                 completedOrders.innerHTML = "";
                 let salesTotal = 0;
 
+                // ✅ Sort orders by date
+                orders.sort((a, b) => new Date(a.date) - new Date(b.date));
+
                 orders.forEach((order, index) => {
-                    let row = `<tr>
+                    let statusClass = order.orderStatus.replace(/ /g, ""); // Remove spaces for CSS class
+                    let row = `<tr class="${statusClass}">
                         <td>${order.date}</td>
                         <td>${order.customerId}</td>
                         <td>${order.customerName}</td>
@@ -187,32 +201,9 @@
                 orderForm.reset();
             });
 
-            window.deleteOrder = function(index) {
-                orders.splice(index, 1);
-                saveData();
-                renderTables();
-            };
-
-            window.completeOrder = function(index) {
-                completed.push(orders[index]);
-                orders.splice(index, 1);
-                saveData();
-                renderTables();
-            };
-
-            window.editOrder = function(index) {
-                let order = orders[index];
-                document.getElementById("date").value = order.date;
-                document.getElementById("customerId").value = order.customerId;
-                document.getElementById("customerName").value = order.customerName;
-                document.getElementById("orderNumber").value = order.orderNumber;
-                document.getElementById("saleAmount").value = order.saleAmount;
-                document.getElementById("orderStatus").value = order.orderStatus;
-                document.getElementById("notes").value = order.notes;
-                orders.splice(index, 1);
-                saveData();
-                renderTables();
-            };
+            window.deleteOrder = function(index) { orders.splice(index, 1); saveData(); renderTables(); };
+            window.completeOrder = function(index) { completed.push(orders[index]); orders.splice(index, 1); saveData(); renderTables(); };
+            window.editOrder = function(index) { Object.assign(document.getElementById("orderForm"), orders.splice(index, 1)[0]); saveData(); renderTables(); };
 
             renderTables();
         });
